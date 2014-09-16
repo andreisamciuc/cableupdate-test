@@ -1,0 +1,77 @@
+#!/bin/sh
+
+echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --  "Checking for updates..";
+
+#################
+# PULLING FILES #
+#################
+
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
+cd /home/ubuntu/cableguardianupdates/;
+PULL_OUT=`git pull 2>&1`;
+
+case "$PULL_OUT" in
+	*"Updating"* ) 
+		FOUND=true;
+		echo "";
+		echo $PULL_OUT;;
+	* )
+		FOUND=false;
+		echo "";
+		echo $PULL_OUT;;
+esac
+
+if [ $FOUND ]; then
+
+#################
+# STOP  SERVICE #
+#################
+	
+	echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --  `service cable_guardian stop`;
+
+#################
+#  COPY  FILES  #
+#################
+
+
+	cp -v /home/ubuntu/cableguardianupdates/CableGuardian.jar /home/ubuntu/;
+	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated CableGuardian.jar;
+	
+	echo '\n\n';
+	rm -rf /var/www/html/*;
+	cp -vr /home/ubuntu/cableguardianupdates/www/* /var/www/html/;
+	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated /var/www/html folder;
+
+
+	cp -v /home/ubuntu/cableguardianupdates/CBUpdater /etc/cron.hourly/cable_guardian_hourly;
+	chmod +x /etc/cron.hourly/cable_guardian_hourly;
+	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated CBUpdater;
+	
+	cp -v /home/ubuntu/cableguardianupdates/deploy /home/ubuntu;
+	chmod +x /home/ubuntu/deploy;
+	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated deploy;
+
+
+#################
+#?RUN  DEPLOYER?#
+#################
+
+#	/home/ubuntu/cableguardianupdates/deploy >> /var/log/cable_guardian/deploy_log;
+#		echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Executed deployer;
+
+#################
+# SETTING  TIME #
+#################
+
+	ntpdate -b -s -u pool.ntp.org;
+	hwclock -w -f /dev/rtc1;
+
+#################
+# START SERVICE #
+#################
+
+	echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --  `service cable_guardian start`;
+
+
+fi
+
