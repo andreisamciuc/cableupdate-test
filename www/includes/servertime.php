@@ -9,5 +9,7 @@
 ############################# 
 //Show server time
 error_reporting(0);
-echo "<span class='icon-time'></span> ".date("H:i:s d/m/Y");
+echo "
+	<a href='#' onclick='javascript:pdntime.launch();'>
+	<span class='icon-time'></span> ".date("H:i:s d/m/Y");
 ?>
