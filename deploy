@@ -1,9 +1,32 @@
 #!/bin/sh
 
-echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Starting install script..";
+echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --  "Starting install script..";
 echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Check if you need to update MYSQL_USER and MYSQL_PASS inside this script"
-MYSQL_USER="root"
-MYSQL_PASS="root"
+
+
+#################
+#     SQL       #
+#################
+
+while getopts "i" OPT; do
+case $OPT in
+	i)
+		if [ $# -eq 1 ]; then
+			echo "Incorrect usage of sql installer option : use - './deploy -i user password'";
+			exit 0;
+		fi
+		MYSQL_USER="$2";
+		MYSQL_PASS="$3";
+		echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- "Creating SQL structure..";
+		mysql -u $MYSQL_USER -p$MYSQL_PASS < sql_structure;
+		mysql -u $MYSQL_USER -p$MYSQL_PASS < mock_settings_table;
+esac
+done
+
+
+#################
+#      VARS     #
+#################
 
 LOG_DIR="/var/log/cable_guardian/"
 ETC_INIT="/etc/init/"
@@ -12,10 +35,24 @@ ETC_CRONHOURLY="/etc/cron.hourly/"
 GNOKII_DIR="$HOME/.config/gnokii/"
 VAR_WWW="/var/www/"
 VAR_HTML="/var/www/html/"
+SETIP="/var/www/setip.sh"
+SETTIME="/var/www/settime.sh"
+INIT_CGC="/etc/init/cable_guardian.conf"
+INIT_CGCS="/etc/init/cable_guardian_smsd.conf"
+LOGROTATE_F="/etc/logrotate.d/cable_guardian"
+CRONHOURLY_F="/etc/cron.hourly/cable_guardian_hourly"
+I2CADAPT_DIR="/sys/class/i2c-adapter/"
+I2CEXT_DIR="/sys/class/i2c-adapter/i2c-1/"
+RTC_PATH="/sys/class/i2c-adapter/i2c-1/new_device"
+CLOCK_INIT="/etc/init.d/clock_init"
+
 
 #################
 #  CREATE DIRS  #
 #################
+
+
+
 echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Checking directories..";
 if [ ! -d "$LOG_DIR" ]; then
 	mkdir -p $LOG_DIR;
@@ -47,32 +84,12 @@ if [ ! -d "$VAR_HTML" ]; then
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Created directory "$VAR_HTML";
 fi
 
-#################
-#  MAKE UPDATE  #
-#################
-
-cp -v /home/ubuntu/cableguardianupdates/CableGuardian.jar /home/ubuntu/ 1>>/var/log/cable_guardian/update_log 2>>/var/log/cable_guardian/update_log
-echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated CableGuardian.jar
-
-rm -rf /var/www/html/* -r 1>>/var/log/cable_guardian/update_log 2>>/var/log/cable_guardian/update_log
-cp -vr /home/ubuntu/cableguardianupdates/www/* /var/www/html/ 1>>/var/log/cable_guardian/update_log 2>>/var/log/cable_guardian/update_log
-echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated /var/www/html folder
-
-cp -v /home/ubuntu/cableguardianupdates/CBUpdater.jar /home/ubuntu/ 1>>/var/log/cable_guardian/update_log 2>>/var/log/cable_guardian/update_log
-echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated CBUpdater.jar
 
 #################
-#  COPY FILES   #
+# CREATE  FILES #
 #################
-echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Checking if there are any files missing..";
 
-
-SETIP="/var/www/setip.sh"
-SETTIME="/var/www/settime.sh"
-INIT_CGC="/etc/init/cable_guardian.conf"
-INIT_CGCS="/etc/init/cable_guardian_smsd.conf"
-LOGROTATE_F="/etc/logrotate.d/cable_guardian"
-CRONHOURLY_F="/etc/cron.hourly/cable_guardian_hourly"
+echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Creating Cable Guardian files..";
 
 
 ### cable_guardian.conf
@@ -96,6 +113,7 @@ exec java -jar /home/ubuntu/CableGuardian.jar >> /var/log/cable_guardian/cable_g
 fi
 
 ### cable_guardian_smsd.conf
+
 if [ ! -e "$INIT_CGCS" ]; then
         echo "#Cable Guardian
 
@@ -146,7 +164,7 @@ fi
 if [ ! -e "$CRONHOURLY_F" ]; then 
 		echo "#!/bin/sh
 
-java -jar /home/ubuntu/CBUpdater.jar
+./home/ubuntu/CBUpdater
 
 mysqlcheck -uroot -ppassw0rd --auto-repair --check  --all-databases
 
@@ -180,6 +198,7 @@ fi
 #################
 #    GNOKII     #
 #################
+
 GNOKII_F="$HOME/.config/gnokii/config"
 
 if [ ! -d  "$GNOKII_DIR" ]; then
@@ -399,6 +418,7 @@ fi
 #################
 #    PLUGINS    #
 #################
+
 echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- "Checking plugins..";
 apt-get install apache2-suexec
 
@@ -408,20 +428,9 @@ if [ -z "$SET_CHECK" ]; then
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Added setters to /etc/sudoers;
 fi
 
-#################
-#     SQL       #
-#################
-echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- "Creating SQL structure..";
-mysql -u $MYSQL_USER -p$MYSQL_PASS < sql_structure
-mysql -u $MYSQL_USER -p$MYSQL_PASS < mock_settings_table
-
 ###################
 # BeagleBoneBoard #
 ###################
-I2CADAPT_DIR="/sys/class/i2c-adapter/"
-I2CEXT_DIR="/sys/class/i2c-adapter/i2c-1/"
-RTC_PATH="/sys/class/i2c-adapter/i2c-1/new_device"
-CLOCK_INIT="/etc/init.d/clock_init"
 
 
 if [ ! -d "$I2CADAPT_DIR" ]; then
@@ -469,4 +478,6 @@ fi
 ##############
 #    DONE    #
 ##############
+
 echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  “Install script finished”
+echo '\n\n'------------------------------------------------------------------------------
