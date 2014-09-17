@@ -1,4 +1,5 @@
 #!/bin/sh
+#testing
 
 echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --  "Checking for updates..";
 
