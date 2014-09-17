@@ -172,6 +172,8 @@ $HOME/CBUpdater >> /var/log/cable_guardian/update_log
 fi
 
 
+## setters
+
 if [ ! -e "$SETIP" ]; then 
         echo "sudo /sbin/ifconfig eth0:1 $1
 sudo /sbin/ifconfig eth0:1 netmask $2
@@ -420,9 +422,9 @@ fi
 echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- "Checking plugins..";
 apt-get install apache2-suexec
 
-SET_CHECK=`cat /etc/sudoers | grep var/www/set`
+SET_CHECK=`cat /etc/sudoers | grep /var/www/html/set`
 if [ -z "$SET_CHECK" ]; then
-	echo 'www-data ALL = (ALL) NOPASSWD: /var/www/setip.sh\nwww-data ALL = (ALL) NOPASSWD: /var/www/settime.sh' >> /etc/sudoers;
+	echo 'www-data ALL = (ALL) NOPASSWD: /var/www/html/setip.sh\nwww-data ALL = (ALL) NOPASSWD: /var/www/html/settime.sh' >> /etc/sudoers;
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Added setters to /etc/sudoers;
 fi
 
