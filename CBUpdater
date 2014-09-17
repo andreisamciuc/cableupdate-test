@@ -9,15 +9,22 @@ echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --  "Checking for updates..
 echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
 cd $HOME/cableguardianupdates/;
 PULL_OUT=`git pull 2>&1`;
+
+while true ; do
+        case "$PULL_OUT" in
+                *"up-to-date"* )
+                        FOUND=false;
+                        echo "";
+                        break;;
+                *"changed"* )
+                        FOUND=true;
+                        echo "";
+                        break;;
+        esac
+done
+
 echo $PULL_OUT;
-case "$PULL_OUT" in
-	*"Updating"* ) 
-		FOUND=true;
-		echo "";;
-	* )
-		FOUND=false;
-		echo "";;
-esac
+
 
 if [ $FOUND ]; then
 
