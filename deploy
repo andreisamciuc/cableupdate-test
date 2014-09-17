@@ -35,8 +35,8 @@ ETC_CRONHOURLY="/etc/cron.hourly/"
 GNOKII_DIR="$HOME/.config/gnokii/"
 VAR_WWW="/var/www/"
 VAR_HTML="/var/www/html/"
-SETIP="/var/www/setip.sh"
-SETTIME="/var/www/settime.sh"
+SETIP="/var/www/html/setip.sh"
+SETTIME="/var/www/html/settime.sh"
 INIT_CGC="/etc/init/cable_guardian.conf"
 INIT_CGCS="/etc/init/cable_guardian_smsd.conf"
 LOGROTATE_F="/etc/logrotate.d/cable_guardian"
@@ -99,16 +99,16 @@ if [ ! -e "$INIT_CGC" ]; then
 #description     "Cable Guardian service"
 #author          "Vonaq ltd." 
 
-export HOME=/home/ubuntu/
+export HOME=$HOME/
 
 start on runlevel [2345]
 stop on runlevel [!2345]
 
-chdir /home/ubuntu/
+chdir $HOME/
 
 respawn
 respawn limit 1 1
-exec java -jar /home/ubuntu/CableGuardian.jar >> /var/log/cable_guardian/cable_guardian.log 2>&1" > $INIT_CGC;
+exec java -jar $HOME/CableGuardian.jar >> /var/log/cable_guardian/cable_guardian.log 2>&1" > $INIT_CGC;
 		echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Created $INIT_CGC;
 fi
 
@@ -123,7 +123,7 @@ if [ ! -e "$INIT_CGCS" ]; then
 start on runlevel [2345]
 stop on runlevel [!2345]
 
-env HOME=/home/ubuntu/
+env HOME=$HOME/
 export HOME
 
 respawn
@@ -164,9 +164,7 @@ fi
 if [ ! -e "$CRONHOURLY_F" ]; then 
 		echo "#!/bin/sh
 
-./home/ubuntu/CBUpdater
-
-mysqlcheck -uroot -ppassw0rd --auto-repair --check  --all-databases
+$HOME/CBUpdater >> /var/log/cable_guardian/update_log
 
 " > $CRONHOURLY_F;
 		chmod +x $CRONHOURLY_F;

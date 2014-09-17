@@ -41,8 +41,8 @@ if [ $FOUND ]; then
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated /var/www/html folder;
 
 
-	cp -v $HOME/cableguardianupdates/CBUpdater /etc/cron.hourly/cable_guardian_hourly;
-	chmod +x /etc/cron.hourly/cable_guardian_hourly;
+	cp -v $HOME/cableguardianupdates/CBUpdater $HOME/;
+	chmod +x $HOME/CBUpdater;
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated CBUpdater;
 	
 	cp -v $HOME/cableguardianupdates/deploy $HOME;
@@ -54,15 +54,17 @@ if [ $FOUND ]; then
 #?RUN  DEPLOYER?#
 #################
 
-#	$HOME/cableguardianupdates/deploy >> /var/log/cable_guardian/deploy_log;
-#		echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Executed deployer;
+	$HOME/cableguardianupdates/deploy >> /var/log/cable_guardian/deploy_log;
+	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Executed deployer;
 
 #################
 # SETTING  TIME #
 #################
 
-	ntpdate -b -s -u pool.ntp.org;
-	hwclock -w -f /dev/rtc1;
+#   deploy does it already, activate this option only if deploy script is disabled.
+
+#	ntpdate -b -s -u pool.ntp.org;
+#	hwclock -w -f /dev/rtc1;
 
 #################
 # START SERVICE #
