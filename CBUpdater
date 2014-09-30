@@ -1,6 +1,8 @@
 #!/bin/sh
 
-echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --  "Checking for updates..";
+echo '\n\n';
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
+echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Checking for updates..";
 
 #################
 # PULLING FILES #
@@ -43,26 +45,25 @@ if [ $FOUND -eq 1 ]; then
 #################
 
 
-	echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --------------------------------- >> /var/log/cable_guardian/copy_log;
+	echo '\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --------------------------------- >> /var/log/cable_guardian/copy_log;
 	cp -v $HOME/cableguardianupdates/CableGuardian.jar /etc/init.d/  >> /var/log/cable_guardian/copy_log;
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated CableGuardian.jar;
 
-	echo '\n\n';
 	rm -rf /var/www/html/*;
 	cp -vr $HOME/cableguardianupdates/www/* /var/www/html/ >> /var/log/cable_guardian/copy_log;
-	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated /var/www/html folder;
+	echo '\n'`date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated /var/www/html folder;
 
 
 	cp -v $HOME/cableguardianupdates/CBUpdater $HOME/ >> /var/log/cable_guardian/copy_log;
 	chmod +x $HOME/CBUpdater;
-	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated CBUpdater;
+	echo '\n'`date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated CBUpdater;
 
 #	cp -v $HOME/cableguardianupdates/deploy $HOME >> /var/log/cable_guardian/copy_log;
 #	chmod +x $HOME/deploy;
 #	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated deploy;
 
-	echo '\n\n----------------Done with copied files for this update-------------';
-        echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` ------------------$;
+	echo '\n----------------Done with copied files for this update-------------';
+        echo '\n'`date | awk '{print $3" "$2" "$6"  "$4}'` ------------------$;
  
 
 
@@ -86,8 +87,8 @@ if [ $FOUND -eq 1 ]; then
 # START SERVICE #
 #################
 
-	echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --  `service cable_guardian start`;
-
+	echo '\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --  `service cable_guardian start`;
+	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"'\n\n';
 
 fi
 
