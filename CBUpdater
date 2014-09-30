@@ -62,7 +62,7 @@ if [ $FOUND -eq 1 ]; then
 #	chmod +x $HOME/deploy;
 #	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated deploy;
 
-	echo '\n`date | awk '{print $3" "$2" "$6"  "$4}'`------Done with copied files for this update-------------';
+	echo '\n`date | awk '{print $3" "$2" "$6"  "$4}'`------Done with copied files for this update------------';
         
 
 
