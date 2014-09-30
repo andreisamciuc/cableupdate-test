@@ -1,6 +1,0 @@
-#!/bin/sh
-
-$HOME/CBUpdater >> /var/log/cable_guardian/update_log
-
-
-
