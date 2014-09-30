@@ -2,7 +2,7 @@
 
 echo '\n';
 echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"'\n';
-echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Checking for updates..";
+echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Checking for updates.."'\n';
 
 #################
 # PULLING FILES #
