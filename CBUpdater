@@ -20,6 +20,10 @@ while true ; do
                         FOUND=1;
                         echo "";
                         break;;
+		*"fatal"* )
+			FOUND=0;
+			echo "";
+			break;;
         esac
 done
 
@@ -38,6 +42,7 @@ if [ $FOUND -eq 1 ]; then
 #  COPY  FILES  #
 #################
 
+
 	echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --------------------------------- >> /var/log/cable_guardian/copy_log;
 	cp -v $HOME/cableguardianupdates/CableGuardian.jar /etc/init.d/  >> /var/log/cable_guardian/copy_log;
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated CableGuardian.jar;
@@ -52,9 +57,9 @@ if [ $FOUND -eq 1 ]; then
 	chmod +x $HOME/CBUpdater;
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated CBUpdater;
 
-	cp -v $HOME/cableguardianupdates/deploy $HOME >> /var/log/cable_guardian/copy_log;
-	chmod +x $HOME/deploy;
-	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated deploy;
+#	cp -v $HOME/cableguardianupdates/deploy $HOME >> /var/log/cable_guardian/copy_log;
+#	chmod +x $HOME/deploy;
+#	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated deploy;
 
 	echo '\n\n----------------Done with copied files for this update-------------';
         echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` ------------------$;
@@ -65,8 +70,8 @@ if [ $FOUND -eq 1 ]; then
 #?RUN  DEPLOYER?#
 #################
 
-#	$HOME/cableguardianupdates/deploy >> /var/log/cable_guardian/deploy_log;
-#	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Executed deployer;
+##	$HOME/cableguardianupdates/deploy >> /var/log/cable_guardian/deploy_log;
+##	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Executed deployer;
 
 #################
 # SETTING  TIME #
@@ -74,8 +79,8 @@ if [ $FOUND -eq 1 ]; then
 
 #   deploy does it already, activate this option only if deploy script is disabled.
 
-#	ntpdate -b -s -u pool.ntp.org;
-#	hwclock -w -f /dev/rtc1;
+	ntpdate -b -s -u pool.ntp.org;
+	hwclock -w -f /dev/rtc1;
 
 #################
 # START SERVICE #
