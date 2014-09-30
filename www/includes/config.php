@@ -30,8 +30,9 @@ error_reporting(0);
 //System Name
 $system_name = "Cable Guardian";
 
+$vers = mysql_query("SELECT `setting_value` FROM `settings` WHERE `setting_name` = 'version'");
 //System Version
-$system_version = "1.0.0";
+$system_version = "0.".mysql_result($vers, 0);
 
 /* Specify user levels */
 define ("ADMIN_LEVEL", 1);

@@ -1,0 +1,7 @@
+use cable_guardian;
+LOCK TABLES `settings` WRITE;
+/*!40000 ALTER TABLE `settings` DISABLE KEYS */;
+INSERT INTO `settings` VALUES ('2014-08-14 15:24:35','hostname','watford12'),('2014-08-14 15:37:33','SystemAdmin','fred@fredshouse.com'),('2014-08-14 15:37:33','telnumber','01923 777333'),('2014-08-14 15:57:59','ip_address','192.168.3.212'),('2014-07-19 14:47:25','ip_netmask','255.255.255.0'),('2014-08-14 15:57:59','ip_gateway','192.168.3.254'),('2014-07-19 14:47:25','ip_dns','8.8.8.8'),('2014-08-14 15:35:21','pop_port','110'),('2014-08-14 15:35:21','pop_user','cableguardian212@vonaq.com'),('2014-08-14 15:35:21','pop_password','cableroot'),('2014-08-11 13:33:05','pop_socket',''),('2014-08-14 15:35:21','pop_host','pop.iomartmail.com'),('2014-08-14 15:35:21','smtp_host','smtp.iomartmail.com'),('2014-08-11 13:33:05','smtp_starttls',''),('2014-08-14 15:35:21','smtp_user','cableguardian212@vonaq.com'),('2014-08-14 15:35:21','smtp_password','cableroot'),('2014-08-13 12:16:20','smtp_port','25');
+/*!40000 ALTER TABLE `settings` ENABLE KEYS */;
+UNLOCK TABLES;
+

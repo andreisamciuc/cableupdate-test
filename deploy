@@ -1,25 +1,27 @@
 #!/bin/sh
 
 echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --  "Starting install script..";
-echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Check if you need to update MYSQL_USER and MYSQL_PASS inside this script"
 
 
 #################
 #     SQL       #
 #################
 
-while getopts "i" OPT; do
+while getopts "d" OPT; do
 case $OPT in
-	i)
+	d)
 		if [ $# -eq 1 ]; then
+			echo ""
 			echo "Incorrect usage of sql installer option : use - './deploy -i user password'";
 			exit 0;
 		fi
 		MYSQL_USER="$2";
 		MYSQL_PASS="$3";
+		echo "";
 		echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- "Creating SQL structure..";
 		mysql -u $MYSQL_USER -p$MYSQL_PASS < sql_structure;
-		mysql -u $MYSQL_USER -p$MYSQL_PASS < mock_settings_table;
+
+#mysql -u $MYSQL_USER -p$MYSQL_PASS < mock_settings_table;
 esac
 done
 
@@ -35,8 +37,9 @@ ETC_CRONHOURLY="/etc/cron.hourly/"
 GNOKII_DIR="$HOME/.config/gnokii/"
 VAR_WWW="/var/www/"
 VAR_HTML="/var/www/html/"
-SETIP="/var/www/html/setip.sh"
-SETTIME="/var/www/html/settime.sh"
+
+SETIP="/var/www/setip.sh"
+SETTIME="/var/www/settime.sh"
 INIT_CGC="/etc/init/cable_guardian.conf"
 INIT_CGCS="/etc/init/cable_guardian_smsd.conf"
 LOGROTATE_F="/etc/logrotate.d/cable_guardian"
@@ -45,18 +48,17 @@ I2CADAPT_DIR="/sys/class/i2c-adapter/"
 I2CEXT_DIR="/sys/class/i2c-adapter/i2c-1/"
 RTC_PATH="/sys/class/i2c-adapter/i2c-1/new_device"
 CLOCK_INIT="/etc/init.d/clock_init"
-
+CG_INIT_F="/etc/init.d/CableGuardian.jar"
+GNOKII_F="$HOME/.config/gnokii/config"
 
 #################
 #  CREATE DIRS  #
 #################
-
-
-
+echo ""
 echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Checking directories..";
 if [ ! -d "$LOG_DIR" ]; then
 	mkdir -p $LOG_DIR;
-	echo Created directory "$LOG_DIR";
+	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Created directory "$LOG_DIR";
 fi
 
 if [ ! -d "$ETC_INIT" ]; then
@@ -84,333 +86,36 @@ if [ ! -d "$VAR_HTML" ]; then
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Created directory "$VAR_HTML";
 fi
 
+if [ ! -d  "$GNOKII_DIR" ]; then
+        mkdir -p $GNOKII_DIR;
+        echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Created directory "$GNOKII_DIR";
+fi
+
 
 #################
 # CREATE  FILES #
 #################
-
+echo ""
 echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Creating Cable Guardian files..";
 
+# Main files
+cp -iv cable_guardian.conf $INIT_CGC;
+cp -iv cable_guardian_smsd.conf $INIT_CGCS;
+cp -iv cable_guardian $LOGROTATE_F;
+cp -iv cable_guardian_hourly $CRONHOURLY_F; chmod +x $CRONHOURLY_F;
+cp -iv clock_init $CLOCK_INIT; chmod +x $CLOCK_INIT;
+cp -iv settime.sh $SETTIME; chmod +x $SETTIME;
+cp -iv setip.sh $SETIP; chmod +x $SETIP;
 
-### cable_guardian.conf
-if [ ! -e "$INIT_CGC" ]; then
-	echo "# Cable Guardian
+# WWW files
+cp -r www/* $VAR_HTML/
 
-#description     "Cable Guardian service"
-#author          "Vonaq ltd." 
+# Core files
+cp -iv CBUpdater $HOME/
+cp -iv CableGuardian.jar $CG_INIT_F;
 
-export HOME=$HOME/
-
-start on runlevel [2345]
-stop on runlevel [!2345]
-
-chdir $HOME/
-
-respawn
-respawn limit 1 1
-exec java -jar $HOME/CableGuardian.jar >> /var/log/cable_guardian/cable_guardian.log 2>&1" > $INIT_CGC;
-		echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Created $INIT_CGC;
-fi
-
-### cable_guardian_smsd.conf
-
-if [ ! -e "$INIT_CGCS" ]; then
-        echo "#Cable Guardian
-
-#description     "Cable Guardian SMSd service"
-#author          "Vonaq ltd." 
-
-start on runlevel [2345]
-stop on runlevel [!2345]
-
-env HOME=$HOME/
-export HOME
-
-respawn
-respawn limit 1 1
-
-pre-start script
-sleep 15;
-end script
-
-exec /usr/sbin/smsd -u cable -p akses -d cable_guardian -c localhost -m mysql -b MT -f /var/log/cable_guardian/smsdaemon.log
-
-" > $INIT_CGCS;
-		echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Created $INIT_CGCS;
-fi
-
-### cable_guardian
-
-if [ ! -e "$LOGROTATE_F" ]; then 
-	echo "/var/log/cable_guardian/* {
-  rotate 15
-  create 600 root root
-  daily
-  compress
-  delaycompress
-  notifempty
-  sharedscripts
-  postrotate
-        /usr/sbin/service cable_guardian restart
-  endscript
-}
-" > $LOGROTATE_F;
-		chmod +x $LOGROTATE_F;
-	 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Created $LOGROTATE_F;
-fi
-
-## cron.hourly
-
-if [ ! -e "$CRONHOURLY_F" ]; then 
-		echo "#!/bin/sh
-
-$HOME/CBUpdater >> /var/log/cable_guardian/update_log
-
-" > $CRONHOURLY_F;
-		chmod +x $CRONHOURLY_F;
-		echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Created $CRONHOURLY_F;
-fi
-
-
-## setters
-
-if [ ! -e "$SETIP" ]; then 
-        echo "sudo /sbin/ifconfig eth0:1 $1
-sudo /sbin/ifconfig eth0:1 netmask $2
-sudo route del default
-sudo route add default gw $3
-sudo echo 'nameserver '$4 > /etc/resolv.conf" > $SETIP;
-		chmod +x $SETIP;
-		echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Created $SETIP;
-fi
-
-if [ ! -e "$SETTIME" ]; then 
-	echo "date --set "$1 $2:00"
-hwclock -w -f /dev/rtc1" > $SETTIME;
-	chmod +x $SETTIME;
-	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Created $SETTIME;
-fi
-
-
-
-
-
-#################
-#    GNOKII     #
-#################
-
-GNOKII_F="$HOME/.config/gnokii/config"
-
-if [ ! -d  "$GNOKII_DIR" ]; then
-	mkdir $HOME/.config/gnokii/;
-	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Created directory $GNOKII_DIR:	
-fi
-
-
-######## Creating GNOKII config file  ##############
-
-if [ ! -e "$GNOKII_F" ]; then
-	echo "# This is a sample ~/.gnokiirc file.  Copy it into your
-# home directory and name it .gnokiirc.
-# See http://wiki.gnokii.org/index.php/Config for working examples.
-#
-
-[global]
-
-# Set port to the physical port used to connect to your phone.
-# Linux version is:
-port = /dev/ttyUSB2
-#
-# For MacOSX you will need something like:
-# port = /dev/cu.USA28X1P1.1
-#
-# For Win32 you want to use:
-# port = com1:
-# or similiar.
-#
-# FreeBSD (probably NetBSD and OpenBSD too) use:
-# port = /dev/cuaa0
-#
-# With Linux-IrDA you will want to use
-# port = /dev/ircomm0
-# or similiar.
-#
-# Use this setting also for the Bluetooth connection:
-# port = aa:bb:cc:dd:ee:ff
-# when using it with AT driver set it to:
-# port = /dev/rfcomm0
-# or similiar.
-#
-# For the Linux USB cables you will need one of the following settings (or
-# similiar)
-# port = /dev/ttyUSB0
-# port = /dev/tts/USB0
-# port = /dev/ttyACM0
-# the last one will work only with AT driver. The correct setting should be
-# given in the dmesg output.
-#
-# If you use connection type dku2libusb use it to denote which use endpoint
-# you'd wish to use. It is useful when you have more than one phone connected
-# to your computer using DKU2 cable. Numbering goes from 1 upwards.
-# Default is 1.
-# port = 1
-
-# Set model to the model number of your phone. For the
-# Symbian phones use:
-# model = symbian
-# For other non-Nokia phones and when you want to use AT
-# mode use:
-# model = AT
-# If you can't figure out what to put here read the FAQ.
-# If it still doesn't help, consult gnokii-ml or #gnokii at freenode.
-model = AT
-# There are few main models that should make use of the certain drivers.
-# These are: 6110, 7110, 6510, 3110, 2110, 6160.
-
-# Set IrDA device name.
-# If you use irda connection you may want gnokii to autodetect the irda
-# device it connects to. This is fine for most of the cases. if you have
-# more than one device in range you may want to give manually the device
-# name so gnokii correctly recognizes it. Use the name that you can see
-# in the discovery log when the phone with infrared is in the range of
-# your irda port.
-# Note that you need to set this for each phone_ section separately. It
-# isn't nested from the global section.
-# irda_string = Nokia 6610i
-
-# Initlength controls the number of characters sent to the
-# phone during initialisation.  You can either set it to
-# the word "default" or a positive integer.
-#
-# You can try setting this value if you want to connect
-# to the phone quicker.  If you've never noticed the
-# connection to be slow, it is suggested that you
-# leave this alone.  Read the initialisation code in fbus-xxxx
-# to understand what this changes if you're curious.
-initlength = default
-
-# The type of the connection, for IR set this to infrared or irda.
-# For the nk6110 driver only infrared is valid for the IrDA connection.
-# See Docs/gnokii-ir-howto for more detailes on this.
-# If you have 6210/6250/7110 phone and dau9p cable (the one you can
-# use with 6100 series and cannot use hardware modem from the phone)
-# you may want to use 'dau9p' value to get faster initialization.
-# If you use dlr3 or dlr3p cable for nokia phones in FBUS mode (ie.
-# you don't use model = AT) you may want to use 'dlr3p' value here.
-# Note that it is recommended and currently the best way to use this
-# cable with nk6510 driver.
-connection = serial
-# With DKU-2 cable use the following setting if you want to libusb driver
-# (recommended):
-# connection = dku2libusb
-# or the following setting if you want to use Linux kernel driver
-# connection = dku2
-# With DKU-5 cable use the following setting
-# connection = dku5
-# For Bluetooth and AT driver use the following setting
-# connection = serial
-# For other Bluetooth settings use
-# connection = bluetooth
-# For infrared connection with phones other than Nokia 6110/6130/6150 use:
-# connection = irda
-# Don't forget to run: 'irattach irda0 -s' or similiar before running gnokii
-# For connection with a PC/SC compatible Smart Card reader use:
-# connection = pcsc
-
-# Set this to 'yes' if you want gnokii to set and check the lock file in
-# /var/lock directory. It avoids potential conflicts with other serial
-# port software (eg. minicom). If you have wrong permissions for the
-# directory, a warning will be generated. If you don't want a lockfile, set
-# it to 'no'.
-use_locking = yes
-
-# Baudrate to use on serial port connections.
-# Currently used only by models AT and BIP/CIMD. Defaults to 19200.
-serial_baudrate = 115200
-
-# Force waiting after each send character the specified usec time.
-# Value -1 forces the fastest 'block' writing,
-# value 0 writes each character separately without any explicite waiting,
-# other positive values specify the appropriate 1/1000000 sec delaying.
-# Siemens M20 requires at least "1"!  FIXME: Model-driven autodetection
-#serial_write_usleep = 10000
-
-# Force serial port handshaking mode, useful primarily for "AT" model.
-# Gnokii "AT" model uses software handshake by default.
-# Possible values: hardware (RTS/CTS - 7 wires) or software (XON/XOFF - 3 wires)
-#handshake = software
-
-# If defined (not commented out by '#') it will quit Gnokii anytime
-# when DCD line will drop.
-#require_dcd = 1
-
-# If you are using a bluetooth connection, you can specify the rfcomm
-# channel number here. Default value is 1.
-#rfcomm_channel = 1
-
-# There may happen various timeouts during the communication with the phone.
-# This parameter enables the retransmission policy. Ie. if the phone doesn't
-# respond, we send the frame again. This happened mainly with the older
-# phones. You may want to enable it when you see mysterious timeouts.
-# Be very careful with this option. It is suspected to cause phone breakage
-# with new DCT4 phones (like Nokia 6100). By default it is switched off
-# (sm_retry = 0)
-#sm_retry = 1
-
-# Run the specified script(s) right after opening and initializing the device
-# and before any communication (right before closing for disconnect_script).
-# You may find handy to use it to connect your modem to SMS Center
-# when using BIP or CIMD protocols
-# Non-absolute path is relative to the specific directory where gnokii is run!
-#connect_script = /absolute/path/to/gnokii/Docs/sample/cimd-connect
-#disconnect_script =
-
-# When sending SMS you can experience timeouts. This is the feature of the
-# overloaded SMSCs. The phones waits for the response from the SMSC confirming
-# that it received the short message. When the SMSC is DoSed with many requests
-# it will take more time to get the response. Adjust it to your needs. The
-# value is given in seconds to wait. Defaults to 10 seconds. Set to 0 to wait
-# forever.
-smsc_timeout = 10
-
-# Set this to 1 if you want to break your phone with xgnokii. Works only
-# with few Nokia models and FBUS communication
-[xgnokii]
-allow_breakage = 0
-
-# Set bindir to point to the location of the various gnokiid binaries.
-# In particular ensure that mgnokiidev is in this location, with
-# permissions 4750, owned by root, group gnokii.  Ensure you
-# are in the gnokii group and that the group exists...
-[gnokiid]
-bindir = /usr/sbin/
-
-# Any entries in the following two sections will be set as environment
-# variables when running the scripts.
-# Handy for use for $VAR substitutions in your chat(8) script.
-[connect_script]
-TELEPHONE = 12345678
-[disconnect_script]
-
-
-# The following parameters control how libgnokii handles the debugging messages.
-# Currently there are three categories: "debug" controls the libgnokii
-# normal debug output, "rlpdebug" controls the debug output of the RLP
-# subsystem, and "xdebug" is used by the xgnokii or smsd.
-
-[logging]
-
-# where to log the debug output (on: stderr, off: /dev/null)
-debug = on
-
-# where to log the rlp debug output (on: stderr, off: /dev/null)
-rlpdebug = on
-
-# where to log X debug output (on: stderr, off: /dev/null)
-xdebug = on
-" > $GNOKII_F;
-	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Created $GNOKII_F;
-fi
+# GNOKII files
+cp -iv config $GNOKII_F;
 
 ######DONE WITH GNOKII##########
 
@@ -418,13 +123,13 @@ fi
 #################
 #    PLUGINS    #
 #################
-
+echo ""
 echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- "Checking plugins..";
 apt-get install apache2-suexec
 
-SET_CHECK=`cat /etc/sudoers | grep /var/www/html/set`
+SET_CHECK=`cat /etc/sudoers | grep /var/www/set`
 if [ -z "$SET_CHECK" ]; then
-	echo 'www-data ALL = (ALL) NOPASSWD: /var/www/html/setip.sh\nwww-data ALL = (ALL) NOPASSWD: /var/www/html/settime.sh' >> /etc/sudoers;
+	echo 'www-data ALL = (ALL) NOPASSWD: /var/www/setip.sh\nwww-data ALL = (ALL) NOPASSWD: /var/www/settime.sh' >> /etc/sudoers;
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Added setters to /etc/sudoers;
 fi
 
@@ -432,7 +137,7 @@ fi
 # BeagleBoneBoard #
 ###################
 
-
+echo ""
 if [ ! -d "$I2CADAPT_DIR" ]; then
 	mkdir -p $I2CADAPT_DIR;
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- "Checking set up of BeagleBone RealTimeClock, Created $I2CADAPT_DIR";
@@ -452,32 +157,23 @@ if [ ! -e $RTC_PATH ]; then
 	echo And the RTC time is now `hwclock -r -f /dev/rtc1 | awk '{print $3" "$2" "$4" , "$5" "$6}'` , which should be the same with the system.;
 fi
 
-if [ ! -e $CLOCK_INIT ]; then
-
-	echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Creating startup script";
-
-	echo "#!bin/bash
-		echo ds1307 0x68 > $RTC_PATH
-		hwclock -s -f /dev/rtc1
-		hwclock -w" > $CLOCK_INIT;
-
-	chmod +x $CLOCK_INIT;
-else
-	echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Script is already created.";
-fi
 
 CHECK_C_I=`cat /etc/rc.local | grep /etc/init.d/clock_init`
 if [ -z "$CHECK_C_I" ]; then
-	echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Adding the script to startup";
-	sed -i -e '13i/etc/init.d/clock.init\' /etc/rc.local;
+	echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Adding $CLOCK_INIT to startup";
+	sed -i -e '$i\\/etc\/init.d\/clock_init' /etc/rc.local
 else
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "$CHECK_C_I script is in startup.";
 fi
 
+#############
+# START CG  #
+#############
+service cable_guardian start
 
 ##############
 #    DONE    #
 ##############
-
+echo ""
 echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  “Install script finished”
 echo '\n\n'------------------------------------------------------------------------------

@@ -13,11 +13,11 @@ PULL_OUT=`git pull 2>&1`;
 while true ; do
         case "$PULL_OUT" in
                 *"up-to-date"* )
-                        FOUND=false;
+                        FOUND=0;
                         echo "";
                         break;;
                 *"changed"* )
-                        FOUND=true;
+                        FOUND=1;
                         echo "";
                         break;;
         esac
@@ -26,12 +26,12 @@ done
 echo $PULL_OUT;
 
 
-if [ $FOUND ]; then
+if [ $FOUND -eq 1 ]; then
 
 #################
 # STOP  SERVICE #
 #################
-	
+
 	echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --  `service cable_guardian stop`;
 
 #################
@@ -39,9 +39,9 @@ if [ $FOUND ]; then
 #################
 
 	echo '\n\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --------------------------------- >> /var/log/cable_guardian/copy_log;
-	cp -v $HOME/cableguardianupdates/CableGuardian.jar $HOME/  >> /var/log/cable_guardian/copy_log;
+	cp -v $HOME/cableguardianupdates/CableGuardian.jar /etc/init.d/  >> /var/log/cable_guardian/copy_log;
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated CableGuardian.jar;
-	
+
 	echo '\n\n';
 	rm -rf /var/www/html/*;
 	cp -vr $HOME/cableguardianupdates/www/* /var/www/html/ >> /var/log/cable_guardian/copy_log;
@@ -51,7 +51,7 @@ if [ $FOUND ]; then
 	cp -v $HOME/cableguardianupdates/CBUpdater $HOME/ >> /var/log/cable_guardian/copy_log;
 	chmod +x $HOME/CBUpdater;
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated CBUpdater;
-	
+
 	cp -v $HOME/cableguardianupdates/deploy $HOME >> /var/log/cable_guardian/copy_log;
 	chmod +x $HOME/deploy;
 	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated deploy;
@@ -65,8 +65,8 @@ if [ $FOUND ]; then
 #?RUN  DEPLOYER?#
 #################
 
-	$HOME/cableguardianupdates/deploy >> /var/log/cable_guardian/deploy_log;
-	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Executed deployer;
+#	$HOME/cableguardianupdates/deploy >> /var/log/cable_guardian/deploy_log;
+#	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Executed deployer;
 
 #################
 # SETTING  TIME #

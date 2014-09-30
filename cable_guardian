@@ -1,0 +1,13 @@
+/var/log/cable_guardian/* {
+  rotate 15
+  create 600 root root
+  daily
+  compress
+  delaycompress
+  notifempty
+  sharedscripts
+  postrotate
+        /usr/sbin/service cable_guardian restart
+  endscript
+}
+
