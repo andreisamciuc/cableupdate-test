@@ -1,14 +1,14 @@
 #!/bin/sh
 
 echo '\n\n';
-echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
 echo `date | awk '{print $3" "$2" "$6"  "$4}'` --  "Checking for updates..";
 
 #################
 # PULLING FILES #
 #################
 
-echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
 cd $HOME/cableguardianupdates/;
 PULL_OUT=`git pull 2>&1`;
 
@@ -88,7 +88,8 @@ if [ $FOUND -eq 1 ]; then
 #################
 
 	echo '\n'`date | awk '{print $3" "$2" "$6"  "$4}'` --  `service cable_guardian start`;
-	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"'\n\n';
+	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
+	echo '\n\n';
 
 fi
 
