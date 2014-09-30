@@ -61,8 +61,7 @@ if [ $FOUND -eq 1 ]; then
 #	cp -v $HOME/cableguardianupdates/deploy $HOME >> /var/log/cable_guardian/copy_log;
 #	chmod +x $HOME/deploy;
 #	echo `date | awk '{print $3" "$2" "$6"  "$4}'` -- Updated deploy;
-
-        
+    
 
 
 #################
